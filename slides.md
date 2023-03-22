@@ -102,6 +102,7 @@ The execution of <kbd>smart contracts</kbd> on the <kbd>Ethereum blockchain</kbd
 ---
 layout: image-right
 image: https://source.unsplash.com/collection/94734566/1920x1080
+transition: slide-left
 ---
 
 # Introduction
@@ -123,7 +124,210 @@ graph TD
 ```
 </Transform>
 
+<!-- 
+  today we will be discussing the challenges surrounding Ethereum smart contracts, gas fees, and the gas-related vulnerabilities that can negatively impact these contracts. Let's begin by understanding the problem statement.
 
+As we can see from the diagram, when a user submits a transaction to interact with a smart contract, it gets executed on the Ethereum blockchain. During this execution, gas fees are consumed. These gas fees are essential for the proper functioning of the contract and prevent abuse of the system.
+
+However, there is a downside. Smart contracts may contain gas-related vulnerabilities, which can lead to unexpected issues and unwanted behaviors. For instance, if there isn't enough gas provided for a transaction, the execution may halt, and any changes made during the execution will be reverted.
+
+The problem is further exacerbated when malicious actors exploit these vulnerabilities to launch Denial-of-Service (DoS) attacks on the targeted victim contracts. This highlights the need for efficient tools to detect and prevent such gas-related vulnerabilities in smart contracts.
+
+Unfortunately, current tools for detecting these vulnerabilities have limitations. They often rely on pre-specified code templates and rules, which can lead to false positives and a lack of accuracy in identifying the vulnerabilities.
+
+In the next slides, we'll discuss a novel solution called eTainter that aims to address these limitations and effectively detect gas-related vulnerabilities in Ethereum smart contracts.
+ -->
+
+---
+layout: image-left
+image: https://source.unsplash.com/collection/94734566/1920x1080
+transition: slide-right
+---
+
+# Introduction (cont.)
+Proposed Solution
+
+- Efficient static-analysis-based approach
+- Formulates detection as a taint analysis problem
+- Tracks taints through contract's storage and multiple entry points
+- Domain-specific optimizations to reduce false-positives
+
+```mermaid
+graph LR
+    A[EVM Bytecode] --> B[eTainter]
+    B --> C[Static Taint Analysis]
+    C --> D[Detect Gas-Related Vulnerabilities]
+    D --> E[Report]
+```
+
+
+<!-- 
+  Now that we've discussed the problem statement, let's dive into our proposed solution called eTainter, which is designed to address the limitations of existing tools and effectively detect gas-related vulnerabilities in Ethereum smart contracts.
+
+eTainter is an efficient static-analysis-based approach that formulates the detection of gas-related vulnerabilities as a taint analysis problem. By tracking taints through a contract's storage and multiple entry points, it can accurately identify vulnerabilities that may lead to issues like DoS attacks.
+
+One of the key aspects of eTainter is its domain-specific optimizations, which help reduce false positives and improve the overall accuracy of vulnerability detection.
+
+Let's take a closer look at the workflow of eTainter as shown in the diagram:
+
+1. eTainter takes the EVM bytecode of a smart contract as input.
+2. It then performs static taint analysis on the bytecode to identify potential vulnerabilities.
+3. The analysis helps detect gas-related vulnerabilities that could be exploited by malicious actors.
+4. Finally, eTainter generates a report outlining the identified vulnerabilities, enabling developers to take corrective action before deploying the smart contract on the Ethereum blockchain.
+
+By using eTainter, we can better understand the gas-related vulnerabilities in our smart contracts and take necessary precautions to prevent unwanted behavior and potential attacks. In the next slides, we'll discuss the evaluation and results of eTainter and how it compares to existing tools in the field.
+ -->
+
+---
+transition: fade-out
+---
+
+# Background
+
+Ethereum Smart Contracts
+
+- Distributed computing platform
+- Stack-based Ethereum Virtual Machine (EVM)
+- Persistent private key-value storage
+- Volatile memory
+- EVM bytecode executed through transactions
+
+```mermaid
+graph LR
+    A[User] --> B[Transaction]
+    B --> C[Smart Contract]
+    C --> D[EVM Bytecode]
+    D --> E[Blockchain]
+    F[Miners] --> G[Gas Fees]
+    G --> D
+```
+
+---
+transition: fade-out
+layout: two-cols
+---
+
+# Background (cont.)
+
+EVM ByteCode
+
+- Multiple entry points with function selector
+- Instructions work on data from stack, memory, or storage
+- EVM manages persistent data with SLOAD and SSTORE instructions
+- Arithmetic, logic, and control transfer instructions
+- No method invocation and return instructions
+
+::right::
+
+```mermaid
+graph TB
+    A[Function Selector] --> B[External/Public Function]
+    B --> C[EVM Bytecode]
+    C --> D[Instructions]
+    D --> E[Stack, Memory, Storage]
+```
+---
+transition: fade-out
+---
+
+<table>
+<thead>
+    <tr>
+        <th>Instruction</th>
+        <th>Description</th>
+        <th>Opcode</th>
+    </tr>
+</thead>
+<tbody>
+    <tr>
+        <td>ADD</td>
+        <td>Addition operation</td>
+        <td>0x01</td>
+    </tr>
+    <tr>
+        <td>MUL</td>
+        <td>Multiplication operation</td>
+        <td>0x02</td>
+    </tr>
+    <tr>
+        <td>SUB</td>
+        <td>Subtraction operation</td>
+        <td>0x03</td>
+    </tr>
+    <tr>
+        <td>GT</td>
+        <td>Greater-than comparison</td>
+        <td>0x11</td>
+    </tr>
+    <tr>
+        <td>EQ</td>
+        <td>Equality comparison</td>
+        <td>0x14</td>
+    </tr>
+    <tr>
+        <td>JUMPI</td>
+        <td>Conditional jump</td>
+        <td>0x57</td>
+    </tr>
+    <tr>
+        <td>CALL</td>
+        <td>Call another contract</td>
+        <td>0xF1</td>
+    </tr>
+    <tr>
+        <td>STOP</td>
+        <td>Stop execution</td>
+        <td>0x00</td>
+    </tr>
+    <tr>
+        <td>REVERT</td>
+        <td>Revert changes made during execution</td>
+        <td>0xFD</td>
+    </tr>
+</tbody>
+</table>
+
+<style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+</style>
+
+---
+transition: fade-out
+layout: two-cols
+---
+# Background (cont.)
+
+Taint Analysis
+
+- Used for information-flow-based security
+- Identifies data-flow from low-integrity data (sources) to high-integrity data (sinks)
+- Explicit and implicit tainting
+- Static and dynamic taint analysis
+- Static analysis: potentially imprecise but sound
+- Dynamic analysis: precise but limited coverage
+
+::right::
+
+```mermaid
+graph LR
+    A[Sources] --> B[Taint Analysis]
+    B --> C[Sinks]
+    D[Explicit Tainting] --> B
+    E[Implicit Tainting] --> B
+    F[Static Analysis] --> B
+    G[Dynamic Analysis] --> B
+```
 ---
 
 # Components
