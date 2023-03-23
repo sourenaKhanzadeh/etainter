@@ -546,6 +546,65 @@ To the right, you can see a table listing these EVM instructions along with thei
  -->
 
 ---
+transition: fade-out
+---
+
+# Background (cont.)
+
+Gas-Related Vulnerabilities (1/2)
+
+
+1. Unbounded Loops
+  - Occurs when a loop iteration is determined by user input.
+  - Can cause Denial of Service (DoS) due to loops bound by storage data items.
+  - Example: line 21 in Figure 1.
+2. Implicit Loops
+  - Generated due to Solidity programming patterns.
+  - Example: creditorAddresses = new address.
+
+**Detection for Unbounded Loops**
+
+- Define the loop condition as a sink.
+-  Check if taint sources (data loaded from storage slots written or manipulated by contract users) reach the defined sink.
+
+
+<!-- 
+  In this slide, we will discuss two types of gas-related vulnerabilities.
+
+First, we have Unbounded Loops, which occur when a loop iteration depends on user input. This can cause a Denial of Service, or DoS, when loops are bound by storage data items. An example of this can be found at line 21 in Figure 1.
+
+Second, we have Implicit Loops, which are generated due to Solidity programming patterns. A common example is when developers clear arrays using the pattern "creditorAddresses = new address".
+
+To detect unbounded loops, we can use taint analysis. We define the loop condition as a sink and check if taint sources, such as data loaded from storage slots written or manipulated by contract users, reach the defined sink.
+ -->
+
+---
+transition: fade-out
+---
+
+# Background (cont.)
+
+Gas-Related Vulnerabilities (2/2)
+
+1. DoS with Failed Call
+  - Occurs when external calls are performed in the loop body (e.g., to pay users by sending Ether to several addresses).
+  - Can cause the whole execution to get reverted and the loop never completes.
+  - Example: loop in Figure 1 (line 21) with transfer (line 23).
+
+**Detection for DoS with Failed Call**
+
+- Define the target address of a call executed in the loop's body as a sink if the return of the call is the condition of a revert statement in the loop's body.
+- Check if taint sources (user-defined data loaded from storage) can reach the sink.
+
+
+<!-- 
+  Continuing with gas-related vulnerabilities, we have the DoS with Failed Call vulnerability. This occurs when external calls are performed within a loop body, such as paying users by sending Ether to multiple addresses. This can cause the entire execution to be reverted, and the loop never completes. An example of this is the loop found at line 21 in Figure 1, with the transfer function at line 23.
+
+To detect the DoS with Failed Call vulnerability, we can use taint analysis. We define the target address of a call executed in the loop's body as a sink if the return of the call is the condition of a revert statement in the loop's body. Then, we check if taint sources, such as user-defined data loaded from storage, can reach the sink.
+ -->
+
+
+---
 
 # Components
 
