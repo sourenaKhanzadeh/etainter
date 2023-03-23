@@ -9,7 +9,7 @@ class: 'text-center'
 # https://sli.dev/custom/highlighters.html
 highlighter: shiki
 # show line numbers in code blocks
-lineNumbers: false
+lineNumbers: true
 # some information about the slides, markdown enabled
 info: |
   ## Slidev Starter Template
@@ -202,6 +202,22 @@ graph LR
     G --> D
 ```
 
+<!-- 
+  Ethereum is a distributed computing platform that allows developers to create and deploy smart contracts. These contracts are executed in a stack-based Ethereum Virtual Machine, or EVM, which is a Turing-complete virtual machine designed specifically for Ethereum.
+
+One of the key features of EVM is its support for persistent private key-value storage. This storage allows smart contracts to maintain data across multiple executions, enabling them to perform more complex operations and maintain state.
+
+Additionally, EVM provides volatile memory that gets initialized at the beginning of each contract execution. This memory is used for temporary storage and calculations during the contract's execution.
+
+Smart contracts on the Ethereum network are compiled into EVM bytecode, which is then executed through transactions. These transactions are submitted by users and processed by a network of miners, who compete to validate and include them in the blockchain.
+
+As a part of this process, miners receive execution fees called gas, which are paid by users submitting the transactions. These gas fees help to maintain the network's security and incentivize miners to participate in the validation process.
+
+In this diagram, you can see the flow from a user submitting a transaction, through the execution of the smart contract's EVM bytecode, and finally, the updating of the blockchain. You can also see the role of miners and the gas fees they receive for their work.
+
+
+ -->
+
 ---
 transition: fade-out
 layout: two-cols
@@ -226,6 +242,21 @@ graph TB
     C --> D[Instructions]
     D --> E[Stack, Memory, Storage]
 ```
+
+<!-- 
+  Unlike traditional programs that have a single main entry point, EVM bytecode starts with a function selector, which provides multiple entry points for the contract. This function selector acts as an entry gate, routing the execution to the appropriate external or public function based on the provided function signature.
+
+In the EVM, instructions work on data from three primary sources: the stack, memory, or storage. These instructions perform various operations, including loading and storing data, managing memory, and manipulating control flow.
+
+Two key instructions for managing persistent data in the contract storage are SLOAD and SSTORE. These instructions read and write data to the contract's storage, with the corresponding storage addresses being supplied from the stack.
+
+EVM bytecode also includes arithmetic, logic, and control transfer instructions that enable complex computations and decision-making within the smart contract.
+
+One important aspect to note is that EVM bytecode does not have specific method invocation and return instructions to perform intra-contract function calls. Instead, the EVM pushes the return address to the stack and performs a direct jump to the target address of the method within the bytecode.
+
+The diagram on the right illustrates the process, starting with the function selector, moving through the EVM bytecode execution, and finally, the interaction with the stack, memory, and storage.
+ -->
+
 ---
 transition: fade-out
 ---
@@ -328,6 +359,137 @@ graph LR
     F[Static Analysis] --> B
     G[Dynamic Analysis] --> B
 ```
+
+<!-- 
+  Taint analysis is employed to identify data flows from low-integrity data, known as sources, to high-integrity data, referred to as sinks. When data flows from sources to sinks, it can potentially represent a vulnerability in the system.
+
+There are two forms of tainting: explicit and implicit. Explicit tainting only considers direct data flows from sources to sinks, without accounting for control flows. Implicit tainting, on the other hand, takes into account indirect tainting through control flows, making it necessary for a sound analysis.
+
+Taint analysis can be performed in two ways: statically or dynamically. Static taint analysis techniques may be imprecise, leading to false positives. However, they are generally sound, meaning they cover all potential taint flows in the program and have no false negatives. Dynamic taint analysis, in contrast, is precise and has no false positives, but its coverage is limited by the inputs provided for executing the program, making it unsound and potentially leading to false negatives.
+
+The diagram on the right showcases the flow of taint analysis, starting with sources, moving through the various forms of tainting and analysis methods, and ending at sinks.
+ -->
+
+---
+transition: fade-out
+layout: two-cols
+---
+# Background (cont.)
+
+Motivating Example
+
+- Real-world Ethereum contract (PIPOT)
+- Lottery game with tickets and bet price
+- Users participate by calling buyTicket
+- Owner starts a new game with start function
+- Vulnerabilities: unbounded loop and DoS with Failed Call
+- Current tools (e.g., MadMax) fail to detect these vulnerabilities
+
+::right::
+
+```solidity
+contract PIPOT {
+  uint public fee = 20; mapping(uint => uint) jackpot;
+  struct order{ address player; uint betPrice;}
+  mapping(uint => order[]) orders;
+  function buyTicket(uint betPrice)public payable{
+    orders[game].push(order(msg.sender, betPrice)); 
+    uint distribute = msg.value * fee / 100; 
+    jackpot[game] += (msg.value - distribute);
+  }
+  function start(uint winPrice)public onlyOwner(){
+    if (orders[game].length > 0) { 
+      pickTheWinner(winPrice);
+    }
+    startGame(); 
+  }
+
+  function pickTheWinner(uint winPrice) internal { 
+    uint toPlayer = jackpot[game]/orders[game].length; 
+    for(uint i=0; i<orders[game].length;i++){
+      if (orders[game][i].betPrice == winPrice){ 
+        orders[game][i].player.transfer(toPlayer);
+      }
+    } 
+}
+```
+
+<!-- 
+We will focus on a real-world contract called PIPOT, which implements a lottery game where users can participate by buying tickets and guessing a bet price.
+
+In the PIPOT contract, users participate in the game by calling the buyTicket function, while the owner of the contract can start a new game by calling the start function. The contract, however, has two significant vulnerabilities: unbounded loop and DoS with Failed Call.
+
+The unbounded loop vulnerability occurs when the pickTheWinner function iterates through the dynamic mapping orders in a for-loop. If a large number of players participate in the game, the loop will fail, and the jackpot money will be locked in the contract forever.
+
+The DoS with Failed Call vulnerability occurs when the pickTheWinner function sends money to the winners within the loop. If one of the winners fails to receive the money, the whole loop will fail, and the jackpot money will be locked in the contract forever.
+
+Current tools, such as MadMax, are unable to detect these vulnerabilities, illustrating the need for a more efficient and robust approach to identifying gas-related vulnerabilities in Ethereum smart contracts.
+ -->
+---
+transition: fade-out
+layout: two-cols
+---
+# Background (cont.)
+
+Vulnerabilities in PIPOT Contract
+
+1. Unbounded Loop
+   - Loop iterates through dynamic mapping orders
+   - Large number of players causes loop to fail
+   - Jackpot money locked in contract forever
+
+2. DoS with Failed Call
+   - Money sent to winners within the loop
+   - One winner failing to receive locks jackpot money in contract
+
+::right::
+
+```solidity
+function pickTheWinner(uint winPrice) internal { 
+    uint toPlayer = jackpot[game]/orders[game].length; 
+    for(uint i=0; i<orders[game].length;i++){
+      if (orders[game][i].betPrice == winPrice){ 
+        orders[game][i].player.transfer(toPlayer);
+      }
+    } 
+}
+```
+
+<!-- 
+  In this slide, we will take a closer look at the two vulnerabilities present in the PIPOT contract: Unbounded Loop and DoS with Failed Call. These vulnerabilities are related to the pickTheWinner function, which is responsible for distributing the jackpot to the winners.
+
+1. Unbounded Loop:
+  The unbounded loop vulnerability occurs in the pickTheWinner function when it iterates through the dynamic mapping orders using a for-loop. As the number of players increases, the loop may fail due to exceeding the block gas limit, preventing the winners from receiving their prize money. Consequently, the jackpot money remains locked in the contract forever.
+2. DoS with Failed Call:
+  The DoS with Failed Call vulnerability arises when the pickTheWinner function sends money to the winners within the loop. If one of the winners is unable to receive the money, perhaps due to a failed call or an exception, the entire loop will fail. This results in none of the winners receiving the jackpot, and the jackpot money becomes locked in the contract indefinitely.
+
+These vulnerabilities demonstrate the importance of identifying and addressing gas-related vulnerabilities in Ethereum smart contracts to ensure their security and reliability.
+ -->
+
+---
+transition: fade-out
+---
+
+# Background (cont.)
+
+Limitations of Current Tools
+
+- MadMax tool fails to detect vulnerabilities in PIPOT contract
+- Relies on pre-specified rules
+- Unable to handle nested structures
+- Difficult to express many variations as pre-specified rules
+
+
+<!-- 
+  n this slide, we will discuss the limitations of current tools, specifically focusing on the MadMax tool and its inability to detect the vulnerabilities in the PIPOT contract.
+
+MadMax, a popular tool for detecting gas-related vulnerabilities, failed to identify the unbounded loop and DoS with Failed Call vulnerabilities in the PIPOT contract. The primary reason for this is its reliance on pre-specified rules to identify vulnerabilities.
+The pre-specified rules in MadMax are not flexible enough to handle nested structures, such as multi-dimensional arrays, which are present in the PIPOT contract example. The rules used by MadMax for detecting vulnerabilities do not work well with these complex data structures, leading to missed vulnerabilities.
+
+Another limitation of using pre-specified rules is that it's difficult to express many variations and edge cases as rules. This means that even if the rules are modified to handle a specific case, there are likely other variations that the tool cannot detect.
+In conclusion, the limitations of current tools like MadMax highlight the need for more advanced and flexible approaches to detecting gas-related vulnerabilities in Ethereum smart contracts.
+ -->
+
 ---
 
 # Components
