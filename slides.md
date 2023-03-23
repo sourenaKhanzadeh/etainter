@@ -491,6 +491,61 @@ In conclusion, the limitations of current tools like MadMax highlight the need f
  -->
 
 ---
+transition: fade-out
+layout: two-cols
+---
+
+# Background (cont.)
+
+Taint Sources in EVM Analysis
+
+- EVM instructions introducing user data as taint sources
+  - CALLDATALOAD, CALLDATACOPY, CALLER, ORIGIN, CALLVALUE
+- EVM instruction SLOAD loads data from contract's storage
+  - Initially considered tainted data
+  - Further checks validate if storage sources are user-controlled
+
+::right::
+
+<Transform :scale="0.8">
+Table 1: EVM Instructions as Taint Sources
+
+| EVM Instruction |     Description       |
+|-----------------|-----------------------|
+| CALLDATALOAD    | Read function argument |
+| CALLDATACOPY    | Copy function argument |
+| CALLER          | Transaction sender    |
+| ORIGIN          | Transaction origin    |
+| CALLVALUE       | Ether value           |
+| SLOAD           | Load data from storage |
+
+
+```solidity
+function buyTicket(uint betPrice) public payable {
+  ...
+  orders[game].push(order(msg.sender, betPrice));
+  ...
+}
+...
+for (uint i = 0; i < orders[game].length; i++) {
+  ...
+}
+```
+</Transform>
+
+<!-- 
+  In this slide, we discuss the taint sources used in EVM analysis. These are the EVM instructions that introduce user data as taint sources:
+
+- CALLDATALOAD and CALLDATACOPY read data passed as arguments when calling a contract's function.
+- CALLER and ORIGIN return the sender and the origin of the transaction, respectively.
+- CALLVALUE returns the Ether value of the transaction.
+
+Additionally, the EVM instruction SLOAD loads data from the contract's storage. Although initially considered tainted data, further checks are performed to validate if storage sources are controlled by the contract users.
+
+To the right, you can see a table listing these EVM instructions along with their descriptions. In our example, the 'buyTicket' function processes the 'betPrice' parameter, and the 'orders' mapping uses the 'msg.sender' value. The length of the 'orders' array is read by the SLOAD instruction in the bytecode.
+ -->
+
+---
 
 # Components
 
