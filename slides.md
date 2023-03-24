@@ -709,10 +709,8 @@ transition: slide-left
 ---
 
 <div class="flex">
-  <img class="alg1" src="imgs/alg1.png">
-  <img class="tab1" src="imgs/tab1.png">
-  
-  
+  <img class="alg1" src="/imgs/alg1.png">
+  <img class="tab1" src="/imgs/tab1.png">
 </div>
 
 <div class="elem">
