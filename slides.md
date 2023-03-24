@@ -995,8 +995,54 @@ RQ3 - Prevalence of Gas-Related Vulnerabilities
 ---
 transition: slide-up
 ---
+# Evaluation (cont.)
+
 Conclusion
 
 - eTainter is more effective in detecting gas-related vulnerabilities than MadMax
 - eTainter's performance is comparable to MadMax, but with a higher timeout rate
 - Gas-related vulnerabilities are prevalent in real-world Ethereum contracts
+
+---
+transition: slide-left
+---
+
+# Conclusion
+
+Threats to Validity and Limitations
+
+Threats to validity in the study include external threats, such as the limited number of smart contracts used for comparison with MadMax. This limitation arises from the time-consuming process of manually inspecting and annotating vulnerabilities in contracts. We have partially mitigated this threat by including all contracts used in MadMax's paper and selecting the remaining contracts randomly from the Ethereum blockchain. Internal threats to validity include potential bias in annotating vulnerabilities. To address this, we had two researchers independently perform annotations, only including vulnerabilities agreed upon by both.
+
+Limitations of eTainter include its inability to detect unbounded loops that depend on growing data items, although no such cases were found in our study. Additionally, eTainter relies on other tools to generate the CFG and lift the bytecode to SSA form, which led to timeouts in 12% of analyzed contracts.
+
+---
+transition: slide-left
+---
+
+# Conclusion (cont.)
+Conclusion
+
+In conclusion, eTainter is a static analysis approach for finding gas-related vulnerabilities in smart contracts using static taint analysis on EVM bytecode. Evaluation on 28 annotated contracts and over 60,000 real-world Ethereum contracts showed eTainter's high precision and efficiency, outperforming MadMax. Our findings indicate that gas-related vulnerabilities are prevalent in real-world Ethereum smart contracts, including those most frequently used. Future work can focus on addressing eTainter's limitations and further improving its effectiveness in detecting vulnerabilities in smart contracts.
+
+---
+transition: slide-left
+---
+
+# Conclusion (cont.)
+Strengths
+
+
+  - Comprehensive Approach: The paper presents a comprehensive approach to detecting gas-related vulnerabilities in smart contracts using static taint analysis on EVM bytecode. This method allows for a more in-depth analysis of the contracts, yielding better results than prior work.
+  - Strong Performance Metrics: eTainter demonstrates impressive performance, achieving over 90% precision and outperforming the previous work, MadMax, in terms of recall and precision. This indicates the effectiveness of the proposed method in identifying gas-related vulnerabilities.
+  - Real-world Applicability: The paper evaluates eTainter on a significant number of real-world Ethereum contracts (over 60,000), showcasing its practical application and relevance. The results highlight the prevalence of gas-related vulnerabilities in widely used smart contracts, emphasizing the importance of addressing these issues.
+
+---
+transition: slide-left
+---
+
+# Conclusion (cont.)
+Weaknesses
+
+  - Limited Sample Size for Comparison: The paper uses a relatively small sample size of 28 smart contracts to compare eTainter with MadMax. This may not provide a fully representative comparison, potentially limiting the generalizability of the results.
+  - Dependence on External Tools: eTainter relies on other tools to generate the control flow graph (CFG) and lift the bytecode to static single assignment (SSA) form. This dependence can lead to timeouts in some contracts (12%), preventing eTainter from analyzing them effectively.
+  - Potential Bias in Annotation: The process of annotating vulnerabilities in the 28 smart contracts involves manual inspection by two researchers. This could introduce potential bias in the results, as the researchers' subjective judgments may affect the annotation process. While the paper addresses this concern by having the researchers work independently and only including vulnerabilities agreed upon by both, some bias may still persist.
