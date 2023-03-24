@@ -679,7 +679,47 @@ eTainter Implementation
   eTainter is implemented as an automated tool that works on the EVM bytecode of smart contracts. It generates bytecode using the solc Solidity compiler and employs a modified version of teETher for CFG generation and computing backward slices. Furthermore, eTainter uses the rattle framework for recovering the Static Single Assignment (SSA) form of the bytecode, which enables it to handle data overwrites during the taint analysis process more efficiently.
  -->
 
- 
+
+---
+transition: slide-left
+---
+
+<div class="flex">
+  <img class="alg1" src="imgs/alg1.png">
+  <img class="tab1" src="imgs/tab1.png">
+  
+  
+</div>
+
+<div class="elem">
+
+```mermaid {theme: 'forest', themeVariables: {primary: '#f5f5f5', secondary: '#f5f5f5'}, scale: 0.5}
+graph TD
+A[Input: EVM Bytecode] --> B[Construct CFG]
+B --> C[Identify Taint Sources and Sinks]
+C --> D[Extract CFG Paths Leading to Sinks]
+D --> E[Perform Taint Analysis on Paths]
+E --> F[Check for Protective Patterns]
+F --> G[Exclude Protected Vulnerabilities]
+G --> H[Report Found Vulnerabilities and Vulnerable Functions]
+```
+</div>
+
+<style>
+.alg1 {
+  width: 400px;
+  height: 500px;
+}
+.tab1 {
+  width: 400px;
+  height: 100px;
+}
+.elem{
+  position: absolute;
+  bottom: 10px;
+  right: 100px;
+}
+</style>
 ---
 
 # Components
