@@ -720,254 +720,283 @@ G --> H[Report Found Vulnerabilities and Vulnerable Functions]
   right: 100px;
 }
 </style>
+
+---
+transition: slide-left
 ---
 
-# Components
+# Proposed Methodology (cont.)
 
-<div grid="~ cols-2 gap-4">
-<div>
+Addressing challenges of taint analysis in smart contracts
 
-You can use Vue components directly inside your slides.
+- Propagating taints through storage and memory
+- Checking for protective patterns
+- Identifying loops in EVM bytecode
 
-We have provided a few built-in components like `<Tweet/>` and `<Youtube/>` that you can use directly. And adding your custom components is also super easy.
+<!-- 
+  we will discuss the challenges and solutions in addressing taint analysis for smart contracts, focusing on three main areas: propagating taints through storage and memory, checking for protective patterns, and identifying loops in EVM bytecode. Our goal is to provide you with a comprehensive understanding of the design principles behind eTainter and how it addresses the unique challenges of analyzing smart contracts.
 
-```html
-<Counter :count="10" />
-```
+In this presentation, we will delve into the details of each design decision, providing examples and explaining the rationale behind our choices. By the end of this presentation, you will have a clear understanding of how eTainter tackles the challenges of taint analysis in smart contracts and how it has been specifically designed to provide a robust and efficient solution for the Ethereum ecosystem.
+ -->
 
-<!-- ./components/Counter.vue -->
-<Counter :count="10" m="t-4" />
 
-Check out [the guides](https://sli.dev/builtin/components.html) for more.
+---
+transition: slide-left
+---
 
-</div>
-<div>
+# Proposed Methodology (cont.)
 
-```html
-<Tweet id="1390115482657726468" />
-```
+Handling Storage and Memory Taints
 
-<Tweet id="1390115482657726468" scale="0.65" />
+- Challenges in propagating taints in storage and memory
+- Techniques for validating storage taints
+- Dealing with hashed addresses in storage
+- Handling memory taints with precision
 
-</div>
-</div>
+
+<!-- 
+  In this section, we will discuss the challenges of propagating taints in storage and memory, and our approach to overcoming them. We will cover techniques for validating storage taints, dealing with hashed addresses, and handling memory taints with precision.
+
+Smart contracts utilize storage and memory to store persistent and transient data, respectively. As a result, taint analysis in smart contracts must effectively propagate taints across these two data structures. To achieve this, we have designed several strategies to tackle the challenges associated with storage and memory taints
+ -->
+
+---
+transition: slide-left
+---
+
+# Proposed Methodology (cont.)
+
+Validating Storage Taints
+
+- Distinguishing between tainted and untainted storage slots
+- Recursive taint flow analysis for storage slots
+- Extracting paths leading to SSTORE instructions
+- Reducing path extraction overhead using slices
+
+<!-- 
+  To accurately validate storage taints, we need to distinguish between tainted and untainted storage slots. We achieve this through a recursive taint flow analysis for storage slots. We extract paths leading to SSTORE instructions and reduce path extraction overhead by using slices.
+
+This approach ensures that only tainted data loaded from storage slots are flagged, reducing the number of false positives. Our solution involves recursively checking for possible taint flows that could reach specific storage slots and marking them as sinks. When tainted data is confirmed to have reached these storage slots, they are identified as taint sources.
+ -->
+
+---
+transition: slide-left
+---
+
+# Proposed Methodology (cont.)
+
+Dealing with Hashed Addresses
+
+- Challenges of hashed addresses in storage taint propagation
+- Tainting array/mapping length slots when element slots are tainted
+- Tracking base addresses for hash calculations
+- Over-approximation for unresolvable addresses
 
 <!--
-Presenter note with **bold**, *italic*, and ~~striked~~ text.
+Hashed addresses used to reference individual items within arrays and mappings pose two main challenges in propagating taints through contract storage: difficulty in determining the parent array or mapping of an item from its hashed address, and dealing with cases when the calculation of a hash address depends on user inputs.
 
-Also, HTML elements are valid:
-<div class="flex w-full">
-  <span style="flex-grow: 1;">Left content</span>
-  <span>Right content</span>
-</div>
--->
-
+To address the first challenge, eTainter propagates the taint to the slot that stores the length of an array/mapping when one of its slots is tainted. For the second challenge, eTainter resolves address dependencies by propagating constants through EVM instructions that derive the address. When a precise address cannot be resolved, eTainter over-approximates and considers the whole array or mapping as tainted 
+ -->
 
 ---
-class: px-20
+transition: slide-left
 ---
 
-# Themes
+# Proposed Methodology (cont.)
 
-Slidev comes with powerful theming support. Themes can provide styles, layouts, components, or even configurations for tools. Switching between themes by just **one edit** in your frontmatter:
+Handling Memory Taints
 
-<div grid="~ cols-2 gap-2" m="-t-2">
+- Challenges in modeling memory taints statically
+- Favoring precision in memory modeling
+- Resolving offsets by propagating constants through instructions
+- Handling unresolved memory offsets as untainted
 
-```yaml
----
-theme: default
----
-```
+<!--
+  Handling memory taints is another critical aspect of taint analysis in smart contracts. We have developed a memory modeling approach that favors precision. eTainter resolves offsets by propagating constants through code instructions that derive memory offsets for memory-based instructions. When offsets cannot be resolved, we treat memory locations accessed by these instructions as untainted.
 
-```yaml
----
-theme: seriph
----
-```
-
-<img border="rounded" src="https://github.com/slidevjs/themes/blob/main/screenshots/theme-default/01.png?raw=true">
-
-<img border="rounded" src="https://github.com/slidevjs/themes/blob/main/screenshots/theme-seriph/01.png?raw=true">
-
-</div>
-
-Read more about [How to use a theme](https://sli.dev/themes/use.html) and
-check out the [Awesome Themes Gallery](https://sli.dev/themes/gallery.html).
+Although this modeling may be incomplete, it caters to the requirements of our analysis. As previous research has shown, a significant percentage of offsets in memory writing and reading instructions can be statically resolved, and unresolved offsets have limited impact on contract execution
+ -->
 
 ---
-preload: false
+transition: slide-left
 ---
 
-# Animations
+# Proposed Methodology (cont.)
 
-Animations are powered by [@vueuse/motion](https://motion.vueuse.org/).
+Checking for Protective Patterns
 
-```html
-<div
-  v-motion
-  :initial="{ x: -80 }"
-  :enter="{ x: 0 }">
-  Slidev
-</div>
-```
+- Enhancing precision by excluding protected paths
+- Access control measures to restrict function calls
+- Resumable loops to prevent DoS attacks
 
-<div class="w-60 relative mt-6">
-  <div class="relative w-40 h-40">
-    <img
-      v-motion
-      :initial="{ x: 800, y: -100, scale: 1.5, rotate: -50 }"
-      :enter="final"
-      class="absolute top-0 left-0 right-0 bottom-0"
-      src="https://sli.dev/logo-square.png"
-    />
-    <img
-      v-motion
-      :initial="{ y: 500, x: -100, scale: 2 }"
-      :enter="final"
-      class="absolute top-0 left-0 right-0 bottom-0"
-      src="https://sli.dev/logo-circle.png"
-    />
-    <img
-      v-motion
-      :initial="{ x: 600, y: 400, scale: 2, rotate: 100 }"
-      :enter="final"
-      class="absolute top-0 left-0 right-0 bottom-0"
-      src="https://sli.dev/logo-triangle.png"
-    />
-  </div>
+<!-- 
+  To enhance the precision of eTainter, we also check for protective patterns in the smart contract code, excluding vulnerable paths that implement these patterns. We focus on two primary protective patterns: the use of access control and resumable loops.
 
-  <div
-    class="text-5xl absolute top-14 left-40 text-[#2B90B6] -z-1"
-    v-motion
-    :initial="{ x: -80, opacity: 0}"
-    :enter="{ x: 0, opacity: 1, transition: { delay: 2000, duration: 1000 } }">
-    Slidev
-  </div>
-</div>
-
-<!-- vue script setup scripts can be directly used in markdown, and will only affects current page -->
-<script setup lang="ts">
-const final = {
-  x: 0,
-  y: 0,
-  rotate: 0,
-  scale: 1,
-  transition: {
-    type: 'spring',
-    damping: 10,
-    stiffness: 20,
-    mass: 2
-  }
-}
-</script>
-
-<div
-  v-motion
-  :initial="{ x:35, y: 40, opacity: 0}"
-  :enter="{ y: 0, opacity: 1, transition: { delay: 3500 } }">
-
-[Learn More](https://sli.dev/guide/animations.html#motion)
-
-</div>
+By identifying and considering these protective patterns, eTainter can more accurately report true vulnerabilities, reducing false positives, and enabling a better understanding of the smart contract's security posture.
+ -->
 
 ---
-
-# LaTeX
-
-LaTeX is supported out-of-box powered by [KaTeX](https://katex.org/).
-
-<br>
-
-Inline $\sqrt{3x-1}+(1+x)^2$
-
-Block
-$$
-\begin{array}{c}
-
-\nabla \times \vec{\mathbf{B}} -\, \frac1c\, \frac{\partial\vec{\mathbf{E}}}{\partial t} &
-= \frac{4\pi}{c}\vec{\mathbf{j}}    \nabla \cdot \vec{\mathbf{E}} & = 4 \pi \rho \\
-
-\nabla \times \vec{\mathbf{E}}\, +\, \frac1c\, \frac{\partial\vec{\mathbf{B}}}{\partial t} & = \vec{\mathbf{0}} \\
-
-\nabla \cdot \vec{\mathbf{B}} & = 0
-
-\end{array}
-$$
-
-<br>
-
-[Learn more](https://sli.dev/guide/syntax#latex)
-
+transition: slide-left
 ---
 
-# Diagrams
+# Proposed Methodology (cont.)
 
-You can create diagrams / graphs from textual descriptions, directly in your Markdown.
+Use of Access Control
 
-<div class="grid grid-cols-3 gap-10 pt-4 -mb-6">
-
-```mermaid {scale: 0.5}
-sequenceDiagram
-    Alice->John: Hello John, how are you?
-    Note over Alice,John: A typical interaction
-```
-
-```mermaid {theme: 'neutral', scale: 0.8}
-graph TD
-B[Text] --> C{Decision}
-C -->|One| D[Result 1]
-C -->|Two| E[Result 2]
-```
-
-```plantuml {scale: 0.7}
-@startuml
-
-package "Some Group" {
-  HTTP - [First Component]
-  [Another Component]
-}
-
-node "Other Groups" {
-  FTP - [Second Component]
-  [First Component] --> FTP
-}
-
-cloud {
-  [Example 1]
-}
+- Function modifiers for access control
+- Implementing checks on function caller within the code
+- Excluding vulnerabilities exploitable only by authorized users
 
 
-database "MySql" {
-  folder "This is my folder" {
-    [Folder 3]
-  }
-  frame "Foo" {
-    [Frame 4]
-  }
-}
+<!-- 
+  Access control is a common practice in smart contracts, often implemented through function modifiers or checks within the function code itself. These checks restrict the execution of certain functions to the contract's owner or specific authorized addresses.
 
-
-[Another Component] --> [Example 1]
-[Example 1] --> [Folder 3]
-[Folder 3] --> [Frame 4]
-
-@enduml
-```
-
-</div>
-
-[Learn More](https://sli.dev/guide/syntax.html#diagrams)
+eTainter identifies and excludes vulnerabilities that can only be exploited by the contract's owner or authorized users. This step ensures a more precise analysis of the contract's potential vulnerabilities
+ -->
 
 ---
-src: ./pages/multiple-entries.md
-hide: false
+transition: slide-left
 ---
 
+# Proposed Methodology (cont.)
+
+Resumable Loops
+
+- Splitting loops across multiple transactions
+- Gas checks in each loop iteration
+- Storing last successful loop point in storage
+- Excluding loops with resumable patterns from vulnerability reports
+
+<!-- 
+  Resumable loops are another protective pattern commonly used by developers to guard against DoS attacks when executing unbounded loops. These loops are split across multiple transactions, with gas checks in each iteration to ensure the loop can be safely resumed in the next run.
+
+eTainter excludes vulnerable paths leading to loops that implement these patterns by looking for code patterns that check the available gas, either in the loop header or the loop body. By considering resumable loops, eTainter can provide a more accurate analysis of the smart contract's vulnerabilities.
+ -->
+
 ---
-layout: center
-class: text-center
+transition: slide-left
 ---
 
-# Learn More
+# Proposed Methodology (cont.)
 
-[Documentations](https://sli.dev) · [GitHub](https://github.com/slidevjs/slidev) · [Showcases](https://sli.dev/showcases.html)
+Deriving Bytecode's Loops
+
+- Challenges of identifying benign loops in bytecode
+- Using static-analysis-based filters to exclude compiler-generated loops
+- Identifying unique instruction patterns in benign loops
+- Filtering out loops with simple structure and functionality
+
+
+<!-- 
+  Identifying loops in the EVM bytecode is essential for defining sinks for unbounded loops. However, smart contracts' bytecode often contains benign loops generated by the compiler, which do not correspond to any iterative patterns in the source code.
+
+To filter out these benign loops, eTainter uses static-analysis-based filters that rely on the observation that these loops have a simple structure and unique instruction patterns. By excluding these loops, eTainter can focus on the user-defined loops that are more likely to be associated with potential vulnerabilities in the smart contract.
+ -->
+
+---
+transition: slide-up
+---
+
+# Evaluation
+
+Introduction to Evaluation
+
+- Purpose: to evaluate eTainter's effectiveness, performance, and prevalence of gas-related vulnerabilities in Ethereum contracts
+- Three research questions (RQs):
+  - RQ1: Effectiveness comparison between eTainter and MadMax
+  - RQ2: Performance of eTainter (analysis time and memory consumption)
+  - RQ3: Prevalence of gas-related vulnerabilities in real-world Ethereum contracts
+
+<!-- 
+  we will discuss the evaluation of eTainter, a novel tool for detecting gas-related vulnerabilities in Ethereum smart contracts. Our evaluation aims to answer three main research questions: How effective is eTainter compared to the existing tool MadMax? What is eTainter's performance in terms of analysis time and memory consumption? And finally, how prevalent are gas-related vulnerabilities in real-world Ethereum contracts? To answer these questions, we will use three different datasets: the Annotated dataset, the Ethereum dataset, and the Popular-contracts dataset.
+ -->
+---
+transition: slide-up
+---
+
+# Evaluation (cont.)
+Experimental Setup - Datasets
+
+- Three datasets used:
+  - Annotated dataset (28 unique smart contracts)
+  - Ethereum dataset (60,612 unique contracts)
+  - Popular-contracts dataset (3,000 contracts with the largest number of transactions)
+
+<!-- 
+  We have set up our experiment using three main datasets: the Annotated dataset, the Ethereum dataset, and the Popular-contracts dataset. The Annotated dataset comprises 28 unique smart contracts, which we manually inspected and annotated to identify unbounded loops and DoS with failed call vulnerabilities. The Ethereum dataset consists of 60,612 unique contracts extracted from a snapshot of the Ethereum blockchain, and the Popular-contracts dataset contains 3,000 contracts with the highest number of transactions. To evaluate eTainter's performance, we ran the experiments on ten Intel Xeon 2.5 GHz machines, with a timeout value of 5 minutes per smart contract.
+ -->
+---
+transition: slide-up
+---
+
+# Evaluation (cont.)
+Experimental Setup - Methods and Metrics
+
+- Experiments run on ten Intel Xeon 2.5 GHz machines with 48 GB RAM
+- Timeout value of 5 minutes per smart contract
+- Comparison metrics: precision, recall, and F1 score
+
+
+<!-- 
+  Our first research question focuses on comparing eTainter's effectiveness in detecting gas-related vulnerabilities with MadMax. We calculated the precision, recall, and F1 score for both tools using the Annotated dataset. Our results show that eTainter has an overall precision of 90.4%, recall of 94%, and an F1 score of 92.2%. In comparison, MadMax had a precision of 64.9%, recall of 74%, and an F1 score of 69.2%. These results indicate that eTainter is more effective in detecting gas-related vulnerabilities than MadMax.
+
+
+ -->
+---
+transition: slide-up
+---
+
+# Evaluation (cont.)
+RQ1 - Effectiveness Comparison
+
+- eTainter's overall precision: 90.4%, recall: 94%, F1 score: 92.2%
+- MadMax's overall precision: 64.9%, recall: 74%, F1 score: 69.2%
+- eTainter outperforms MadMax in detecting gas-based vulnerabilities
+
+<!-- 
+  We further analyzed the comparison results by vulnerability class. For unbounded loops, eTainter exhibits high precision (87.5%) and recall (94.6%), while MadMax shows lower precision (60.5%) and recall (70.2%). For DoS with failed call, eTainter has perfect precision (100%) and high recall (92.3%), whereas MadMax has lower precision (78.5%) and recall (84.6%). This analysis demonstrates that eTainter outperforms MadMax for both vulnerability classes.
+ -->
+
+---
+transition: slide-up
+---
+
+# Evaluation (cont.)
+RQ2 - Performance of eTainter
+
+- 12% of contracts in the Ethereum dataset timed out
+- Average analysis time for successful contracts: 8 seconds
+- Average memory consumption: 118 MB
+- 96.97% of contracts analyzed in less than 60 seconds
+
+
+<!--
+  Our second research question focuses on eTainter's performance in terms of analysis time and memory consumption. eTainter timed out in 12% of the contracts in the Ethereum dataset, with an average analysis time of 8 seconds for the remaining contracts. The average memory consumption for eTainter is 118MB. While MadMax has better scalability with only 1.4% timeouts, the average analysis time for both tools is comparable.
+ -->
+
+---
+transition: slide-up
+---
+
+# Evaluation (cont.)
+RQ3 - Prevalence of Gas-Related Vulnerabilities
+
+- Ethereum dataset:
+  - 4.6% of contracts flagged with gas-related vulnerabilities
+  - 4.1% with unbounded loops, 1.2% with DoS with failed call
+- Popular-contracts dataset:
+  - 2.4% of contracts flagged with gas-related vulnerabilities
+  - 1.8% with unbounded loops, 0.8% with DoS with failed call
+
+<!-- 
+ For our third research question, we investigated the prevalence of gas-related vulnerabilities in real-world contracts using the Ethereum and Popular-contracts datasets. In the Ethereum dataset, eTainter flagged 4.6% of the contracts as having gas-related vulnerabilities. In the Popular-contracts dataset, 2.4% of the contracts were flagged as having gas-related vulnerabilities, indicating a lower prevalence in widely-used contracts. This suggests that gas-related vulnerabilities are indeed prevalent in real-world Ethereum contracts, warranting the need for effective detection tools like eTainter.
+ -->
+
+---
+transition: slide-up
+---
+Conclusion
+
+- eTainter is more effective in detecting gas-related vulnerabilities than MadMax
+- eTainter's performance is comparable to MadMax, but with a higher timeout rate
+- Gas-related vulnerabilities are prevalent in real-world Ethereum contracts
