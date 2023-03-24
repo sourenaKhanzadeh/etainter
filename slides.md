@@ -605,6 +605,82 @@ To detect the DoS with Failed Call vulnerability, we can use taint analysis. We 
 
 
 ---
+transition: slide-left
+---
+
+# Proposed Methodology
+
+Taint Analysis Approach for Detecting Gas-Related Vulnerabilities
+
+- Input: EVM bytecode of the smart contract
+- Builds Control Flow Graph (CFG)
+- Identifies taint sources and sinks
+- Extracts CFG paths leading to sinks
+- Performs taint analysis on paths
+- Excludes protected vulnerabilities
+- Reports found vulnerabilities and vulnerable functions
+
+
+<!-- 
+  eTainter takes the EVM bytecode of the smart contract as input and performs the following steps: It builds a Control Flow Graph (CFG), identifies taint sources and sinks, extracts CFG paths leading to the defined sinks, and performs taint analysis on these paths. eTainter then identifies and excludes protected vulnerabilities, reporting the found vulnerabilities and vulnerable functions to the users."
+ -->
+
+---
+transition: slide-left
+---
+
+# Proposed Methodology (cont.)
+
+Control Flow Graph Construction and Extracting Vulnerable Paths
+
+- Constructs a context-sensitive, inter-procedural CFG
+- Represents all functions and their interactions
+- Identifies paths leading to gas-related vulnerabilities
+- Propagates taints through stack, memory, and storage
+- Checks for protective patterns
+
+
+<!-- 
+  In order to perform taint analysis, eTainter first constructs a context-sensitive, inter-procedural CFG, which represents all functions in the contract and their interactions. eTainter identifies paths that lead to gas-related vulnerabilities and propagates taints through the stack, memory, and storage based on the semantics of the EVM instructions. Additionally, eTainter checks for protective patterns that might mitigate the identified vulnerabilities.
+ -->
+
+---
+transition: slide-left
+---
+
+# Proposed Methodology (cont.)
+
+Taint Propagation Rules
+
+- Rule-1: If any operand is tainted, the derived value is tainted.
+- Rule-2: No taint propagation for instructions querying blockchain state or writing to the blockchain (excluding SSTORE).
+- Rule-3: If data read from memory or storage is tainted, the result value is tainted.
+
+
+<!-- 
+  eTainter utilizes three main taint propagation rules during the analysis process. Rule-1 states that if any operand is tainted, the derived value is also tainted. Rule-2 indicates that no taint propagation occurs for instructions querying blockchain state or writing to the blockchain, excluding the SSTORE instruction. Finally, Rule-3 specifies that if the data read from memory or storage is tainted, the resulting value is tainted as well
+ -->
+
+---
+transition: slide-left
+---
+
+# Proposed Methodology (cont.)
+
+eTainter Implementation
+
+- Automated tool working on EVM bytecode
+- Generates bytecode using solc Solidity compiler
+- Modified version of teETher used for CFG and computing backward slices
+- Uses rattle framework for recovering Static Single Assignment (SSA) form of the bytecode
+- Handles data overwrites through SSA form during taint analysis
+
+<!-- 
+  eTainter is implemented as an automated tool that works on the EVM bytecode of smart contracts. It generates bytecode using the solc Solidity compiler and employs a modified version of teETher for CFG generation and computing backward slices. Furthermore, eTainter uses the rattle framework for recovering the Static Single Assignment (SSA) form of the bytecode, which enables it to handle data overwrites during the taint analysis process more efficiently.
+ -->
+
+ 
+---
 
 # Components
 
