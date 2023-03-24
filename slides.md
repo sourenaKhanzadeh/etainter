@@ -603,6 +603,30 @@ Gas-Related Vulnerabilities (2/2)
 To detect the DoS with Failed Call vulnerability, we can use taint analysis. We define the target address of a call executed in the loop's body as a sink if the return of the call is the condition of a revert statement in the loop's body. Then, we check if taint sources, such as user-defined data loaded from storage, can reach the sink.
  -->
 
+---
+transition: fade-out
+---
+
+# Related Work
+
+- MadMax: Static analysis for gas-related vulnerabilities
+- GasReducer, GASPER, and GasChecker: Optimize gas consumption
+- Other static analysis tools: Focus on various security bugs
+- GasFuzzer: Fuzzing approach to detect high gas consumption
+- Taint analysis tools: Osiris, Sereum, and Ethainter
+- SMARTIAN: Fuzzing guided by dynamic and static dataflow analyses
+
+<!-- 
+  In this section, we will discuss related static analysis tools that have been developed for finding gas-related vulnerabilities or optimizing gas consumption in smart contracts. One of the first tools, MadMax, statically analyzes smart contracts for unbounded loops, DoS with Failed Call, and Induction Variable overflows. However, it has some limitations, including high false positives and false negatives.
+
+GasReducer, GASPER, and GasChecker are static analysis tools that focus on optimizing gas consumption in smart contracts by detecting gas-inefficient code patterns, but do not specifically target gas-related vulnerabilities.
+
+There are also a variety of static analysis tools that address other classes of security bugs in smart contracts, such as GasFuzzer, which uses fuzzing to detect high gas consumption values and exception disorder vulnerabilities.
+
+Taint analysis has been employed by tools like Osiris, Sereum, and Ethainter to find bugs in smart contracts. However, these tools do not specifically focus on gas-related issues.
+
+Lastly, SMARTIAN is a recent paper that employs fuzzing guided by dynamic and static dataflow analyses to detect smart contract bugs. Although it does not specifically target gas-related bugs, extending SMARTIAN to detect these vulnerabilities could prove challenging due to the dynamic nature of the approach.
+ -->
 
 ---
 transition: slide-left
